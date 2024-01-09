@@ -1,26 +1,49 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import MouseAnalyst from "./routes/MouseAnalyst";
+import KeyboardAnalyst from "./routes/KeyboardAnalyst";
+import Dashboard from "./routes/Dashboard";
+import NavBar from "./components/NavBar";
+import MainBox from "./components/MainBox";
+import Settings from "./routes/Settings";
+
+function Layout() {
+  return (
+    <>
+      <MainBox>
+        <NavBar />
+        <Outlet />
+      </MainBox>
+    </>
+  );
+}
+
+const router = createBrowserRouter([
+  {
+    element: <Layout />,
+    children: [
+      {
+        path: "/",
+        element: <Dashboard />,
+      },
+      {
+        path: "/mouse",
+        element: <MouseAnalyst />,
+      },
+      {
+        path: "/keyboard",
+        element: <KeyboardAnalyst />,
+      },
+      {
+        path: "/settings",
+        element: <Settings />,
+      },
+    ],
+  },
+]);
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
