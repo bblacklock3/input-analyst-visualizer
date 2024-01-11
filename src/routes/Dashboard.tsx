@@ -11,15 +11,15 @@ import {
 } from "../utils/timeConversions";
 
 const Dashboard = () => {
-  function timerStartOfDay() {
+  function startOfToday() {
     return () => toStrNoTimezone(startOfDay(Date.now()));
   }
 
-  function timerAddHours(hours: number) {
+  function nowPlusHours(hours: number) {
     return () => toStrNoTimezone(addHours(Date.now(), hours));
   }
 
-  function timerAddMinutes(minutes: number) {
+  function nowPlusMinutes(minutes: number) {
     return () => toStrNoTimezone(addMinutes(Date.now(), minutes));
   }
 
@@ -30,21 +30,21 @@ const Dashboard = () => {
       </Text>
       <Grid
         mt={0}
-        p={3}
+        p={5}
         gap={6}
         bg={"#1a202c"}
-        width={"780px"}
-        height={"450px"}
+        width={"800px"}
+        height={"475px"}
+        borderRadius={"3xl"}
         templateColumns={"repeat(4, 1fr)"}
         templateRows={"repeat(2, 1fr)"}
         templateAreas={`"a a b c"
                         "a a d e"`}
-        borderRadius={"lg"}
       >
         <Box gridArea={"a"}>
           <PollingCircularProgress
             type={"click"}
-            startTime={timerStartOfDay()}
+            startTime={startOfToday()}
             title={"Today"}
             dataStr={"/mouse-data/clicks"}
             limit={5000}
@@ -54,7 +54,7 @@ const Dashboard = () => {
         <Box gridArea={"b"}>
           <PollingCircularProgress
             type={"click"}
-            startTime={timerAddHours(-1)}
+            startTime={nowPlusHours(-1)}
             title={"1 Hour"}
             dataStr={"/mouse-data/clicks"}
             limit={1250}
@@ -64,7 +64,7 @@ const Dashboard = () => {
         <Box gridArea={"c"}>
           <PollingCircularProgress
             type={"click"}
-            startTime={timerAddHours(-0.25)}
+            startTime={nowPlusHours(-0.25)}
             title={"15 Min"}
             dataStr={"/mouse-data/clicks"}
             limit={500}
@@ -74,7 +74,7 @@ const Dashboard = () => {
         <Box mt={-4} gridArea={"d"}>
           <PollingCircularProgress
             type={"click"}
-            startTime={timerAddMinutes(-5)}
+            startTime={nowPlusMinutes(-5)}
             title={"5 Min"}
             dataStr={"/mouse-data/clicks"}
             limit={200}
@@ -84,7 +84,7 @@ const Dashboard = () => {
         <Box mt={-4} gridArea={"e"}>
           <PollingCircularProgress
             type={"click"}
-            startTime={timerAddMinutes(-1)}
+            startTime={nowPlusMinutes(-1)}
             title={"1 Min"}
             dataStr={"/mouse-data/clicks"}
             limit={100}
@@ -97,21 +97,21 @@ const Dashboard = () => {
       </Text>
       <Grid
         mt={0}
-        p={3}
+        p={5}
         gap={6}
         bg={"#1a202c"}
-        width={"780px"}
-        height={"450px"}
+        width={"800px"}
+        height={"475px"}
+        borderRadius={"3xl"}
         templateColumns={"repeat(4, 1fr)"}
         templateRows={"repeat(2, 1fr)"}
         templateAreas={`"a a b c"
                         "a a d e"`}
-        borderRadius={"lg"}
       >
         <Box gridArea={"a"}>
           <PollingCircularProgress
             type={"keypress"}
-            startTime={timerStartOfDay()}
+            startTime={startOfToday()}
             title={"Today"}
             dataStr={"/keyboard-data/keypresses"}
             limit={10000}
@@ -121,7 +121,7 @@ const Dashboard = () => {
         <Box gridArea={"b"}>
           <PollingCircularProgress
             type={"keypress"}
-            startTime={timerAddHours(-1)}
+            startTime={nowPlusHours(-1)}
             title={"1 Hour"}
             dataStr={"/keyboard-data/keypresses"}
             limit={2500}
@@ -131,7 +131,7 @@ const Dashboard = () => {
         <Box gridArea={"c"}>
           <PollingCircularProgress
             type={"keypress"}
-            startTime={timerAddHours(-0.25)}
+            startTime={nowPlusHours(-0.25)}
             title={"15 Min"}
             dataStr={"/keyboard-data/keypresses"}
             limit={1000}
@@ -141,7 +141,7 @@ const Dashboard = () => {
         <Box mt={-4} gridArea={"d"}>
           <PollingCircularProgress
             type={"keypress"}
-            startTime={timerAddMinutes(-5)}
+            startTime={nowPlusMinutes(-5)}
             title={"5 Min"}
             dataStr={"/keyboard-data/keypresses"}
             limit={400}
@@ -151,7 +151,7 @@ const Dashboard = () => {
         <Box mt={-4} gridArea={"e"}>
           <PollingCircularProgress
             type={"keypress"}
-            startTime={timerAddMinutes(-1)}
+            startTime={nowPlusMinutes(-1)}
             title={"1 Min"}
             dataStr={"/keyboard-data/keypresses"}
             limit={200}

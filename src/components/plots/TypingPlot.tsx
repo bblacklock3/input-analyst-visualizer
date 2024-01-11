@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Button, Center, HStack, VStack, Text } from "@chakra-ui/react";
 import Plot from "react-plotly.js";
 import { DB_URL } from "../../utils/constants";
@@ -15,7 +15,7 @@ const arrayRange = (start: number, stop: number, step: number) => {
 interface IProps {
   startTime: string;
   endTime: string;
-  timescale: number;
+  timeLimit?: number;
 }
 
 const TypingPlot = (props: IProps) => {
@@ -26,8 +26,7 @@ const TypingPlot = (props: IProps) => {
 
   const startDatetime = props.startTime;
   const endDatetime = props.endTime;
-  const timescaleSec = props.timescale;
-  const timeResolution = 10 * 1000; // 1 sec
+  const timeResolution = 60 * 1000; // 1 sec
   const totalPixelWidth = 1200;
 
   function handleKeypressData() {
@@ -56,14 +55,34 @@ const TypingPlot = (props: IProps) => {
           totalKeypresses.push(keypresses);
         }
         const smaWindow = 10;
-        t = t.slice(smaWindow - 1);
-        totalKeypresses = sma(totalKeypresses, smaWindow);
-        setPlotData({
-          x: t,
-          y: totalKeypresses,
-        });
+        //t = t.slice(smaWindow - 1);
+        //totalKeypresses = sma(totalKeypresses, smaWindow);
+        if (props.timeLimit) {
+          let limitedKeypresses = [];
+          for (let i = 0; i < t.length; i++) {
+            limitedKeypresses.push(
+              timestamps.filter((d: any) => {
+                if (props.timeLimit) {
+                  return d > t[i + 1] - props.timeLimit && d < t[i + 1];
+                }
+              }).length
+            );
+          }
+          setPlotData({
+            x: t,
+            y: limitedKeypresses,
+          });
+        } else {
+          setPlotData({
+            x: t,
+            y: totalKeypresses,
+          });
+        }
       });
   }
+  useEffect(() => {
+    handleKeypressData();
+  }, [props.startTime, props.endTime]);
 
   return (
     <>
@@ -80,10 +99,20 @@ const TypingPlot = (props: IProps) => {
         layout={{
           plot_bgcolor: "#1a202c00",
           paper_bgcolor: "#1a202c00",
+          autosize: false,
+          width: 1000,
+          height: 250,
+          margin: {
+            l: 40,
+            r: 0,
+            b: 40,
+            t: 0,
+          },
           xaxis: {
             type: "date",
             color: "#ffffffff",
-            tickformat: '%I:%M %p',
+            tickformat: "%I %p",
+            nticks: 10,
             tickfont: {
               size: 14,
               color: "#ffffffff",
@@ -99,9 +128,6 @@ const TypingPlot = (props: IProps) => {
           staticPlot: true,
         }}
       />
-      <Button mt={10} onClick={handleKeypressData}>
-        Fetch Data
-      </Button>
     </>
   );
 };
