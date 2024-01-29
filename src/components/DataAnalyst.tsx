@@ -8,45 +8,20 @@ import {
   toStrNoTimezone,
 } from "../utils/timeConversions";
 import TypingSpeedPlot from "../components/plots/TypingSpeedPlot";
-import { Heading, VStack, Stack, HStack, Text } from "@chakra-ui/react";
-import { Radio, RadioGroup } from "@chakra-ui/react";
 import {
-  initializeIcons,
-  createTheme,
-  ThemeProvider,
-  DatePicker,
-  PrimaryButton,
-} from "@fluentui/react";
+  Heading,
+  VStack,
+  Stack,
+  HStack,
+  Text,
+  Button,
+  Icon,
+} from "@chakra-ui/react";
+import { Radio, RadioGroup } from "@chakra-ui/react";
+import "react-day-picker/dist/style.css";
 import DataWindowPlot from "./plots/DataWindowPlot";
-
-const theme = createTheme({
-  palette: {
-    themePrimary: "#169c7c",
-    themeLighterAlt: "#f2fbf9",
-    themeLighter: "#ceefe7",
-    themeLight: "#a7e1d4",
-    themeTertiary: "#5fc3ac",
-    themeSecondary: "#29a78a",
-    themeDarkAlt: "#148c70",
-    themeDark: "#11765e",
-    themeDarker: "#0c5746",
-    neutralLighterAlt: "#323232",
-    neutralLighter: "#3a3a3a",
-    neutralLight: "#484848",
-    neutralQuaternaryAlt: "#505050",
-    neutralQuaternary: "#575757",
-    neutralTertiaryAlt: "#747474",
-    neutralTertiary: "#ececec",
-    neutralSecondary: "#efefef",
-    neutralPrimaryAlt: "#f2f2f2",
-    neutralPrimary: "#e3e3e3",
-    neutralDark: "#f9f9f9",
-    black: "#fcfcfc",
-    white: "#292929",
-  },
-});
-
-const MINUS_DAYS = 0;
+import { MdOutlineArrowBackIos } from "react-icons/md";
+import { MdOutlineArrowForwardIos } from "react-icons/md";
 
 const KeyboardAnalyst = () => {
   const oneMin = 60 * 1000;
@@ -66,46 +41,64 @@ const KeyboardAnalyst = () => {
   //const endTime = toStrNoTimezone(addDays(Date.now(), -MINUS_DAYS));
 
   const [windowSize, setWindowSize] = React.useState("");
-  const [startTime, setStartTime] = React.useState(
-    toStrNoTimezone(addDays(todayDate, -MINUS_DAYS))
-  );
-  const [endTime, setEndTime] = React.useState(
-    toStrNoTimezone(addDays(Date.now(), -MINUS_DAYS))
-  );
+  const [time, setTime] = React.useState({
+    start: todayDate,
+    end: addDays(todayDate, 1),
+  });
 
-  function handleSetStartDate(date: any) {
-    const start = startOfDay(date.getTime());
-    const end = addDays(start, 1);
-    setStartTime(toStrNoTimezone(start));
-    setEndTime(toStrNoTimezone(end));
+  function incTime(days: number) {
+    setTime((prevTime) => {
+      return {
+        start: addDays(prevTime.start, days),
+        end: addDays(prevTime.end, days),
+      };
+    });
   }
+  console.log(windowSize);
 
   return (
     <VStack>
       <HStack p={2} borderRadius={10} bg={"#1a202c"} textColor={"#ffffff"}>
-        <Text size="sm">Start Date:</Text>
-        <ThemeProvider applyTo="body" theme={theme}>
-          <DatePicker
-            placeholder="Select a date"
-            value={new Date()}
-            onSelectDate={handleSetStartDate}
-          />
-        </ThemeProvider>
+        <Text size="sm" fontWeight={"bold"}>
+          {new Date(time.start).toLocaleDateString("en-US")}
+        </Text>
+        <Button
+          size="sm"
+          onClick={() => {
+            incTime(-1);
+          }}
+        >
+          <Icon as={MdOutlineArrowBackIos}></Icon>
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => {
+            incTime(1);
+          }}
+        >
+          <Icon as={MdOutlineArrowForwardIos}></Icon>
+        </Button>
         <Text size="sm">Window Size:</Text>
         <RadioGroup onChange={setWindowSize} value={windowSize}>
           <Stack direction="row" fontSize={14} textColor={"#ffffff"}>
             <Radio value={oneMin.toString()}>1 min</Radio>
             <Radio value={fiveMin.toString()}>5 min</Radio>
             <Radio value={fifteenMin.toString()}>15 min</Radio>
-            <Radio value={""}>None</Radio>
+            <Radio value={oneDay.toString()}>None</Radio>
           </Stack>
         </RadioGroup>
       </HStack>
       <DataWindowPlot
-        startTime={startTime}
-        endTime={endTime}
+        startTime={toStrNoTimezone(time.start)}
+        endTime={toStrNoTimezone(time.end)}
         timeWindow={parseInt(windowSize)}
       />
+      <HStack
+        p={2}
+        borderRadius={10}
+        bg={"#1a202c"}
+        textColor={"#ffffff"}
+      ></HStack>
     </VStack>
   );
 };

@@ -19,6 +19,7 @@ import {
   TimeScale,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import { convertKeypresses } from "../../utils/keyboardMetrics";
 
 ChartJS.register(
   CategoryScale,
@@ -33,7 +34,6 @@ ChartJS.register(
 );
 
 const arrayRange = (start: number, stop: number, step: number) => {
-  console.log(stop - start, step);
   return Array.from(
     { length: (stop - start) / step + 1 },
     (value, index) => start + index * step
@@ -43,7 +43,7 @@ const arrayRange = (start: number, stop: number, step: number) => {
 interface IProps {
   startTime: string;
   endTime: string;
-  timeWindow?: number;
+  timeWindow: number;
 }
 
 const DataWindowPlot = (props: IProps) => {
@@ -65,52 +65,20 @@ const DataWindowPlot = (props: IProps) => {
     fetch(`${DB_URL}data/keyboard-data/?${startStr}&${endStr}`)
       .then((res) => res.json())
       .then((data: any) => {
-        let timestamps: number[] = [];
-        data.forEach((d: any) => {
-          timestamps.push(new Date(d.timestamp).getTime());
-        });
-        timestamps.reverse();
-        let t = arrayRange(
-          timestamps[0],
-          timestamps[timestamps.length - 2],
-          timeResolution
+        const [t, limitedKeypresses] = convertKeypresses(
+          data,
+          timeResolution,
+          props.timeWindow
         );
-        let totalKeypresses = [];
-        let keypresses = 0;
-        for (let i = 0; i < t.length; i++) {
-          keypresses += timestamps.filter((d: any) => {
-            return d > t[i] && d < t[i + 1];
-          }).length;
-          totalKeypresses.push(keypresses);
-        }
-        t = t.slice(smaWindow - 1);
-        totalKeypresses = sma(totalKeypresses, smaWindow);
-        if (props.timeWindow) {
-          let limitedKeypresses = [];
-          for (let i = 0; i < t.length; i++) {
-            limitedKeypresses.push(
-              timestamps.filter((d: any) => {
-                if (props.timeWindow) {
-                  return d > t[i + 1] - props.timeWindow && d < t[i + 1];
-                }
-              }).length
-            );
-          }
-          setPlotData({
-            x: t,
-            y: limitedKeypresses,
-          });
-        } else {
-          setPlotData({
-            x: t,
-            y: totalKeypresses,
-          });
-        }
+        setPlotData({
+          x: t,
+          y: limitedKeypresses,
+        });
       });
   }
   useEffect(() => {
     handleKeypressData();
-  }, [props.startTime, props.endTime]);
+  }, [props.startTime, props.endTime, props.timeWindow]);
 
   const data = {
     labels: plotData.x,
@@ -135,6 +103,8 @@ const DataWindowPlot = (props: IProps) => {
 
     scales: {
       x: {
+        min: props.startTime,
+        max: props.endTime,
         type: "time" as const,
         adapters: {
           date: {
@@ -177,6 +147,7 @@ const DataWindowPlot = (props: IProps) => {
 
   defaults.font.family = "Arial Black";
   defaults.font.size = 16;
+  defaults.animation = false;
 
   return (
     <Box w={"1000px"}>
