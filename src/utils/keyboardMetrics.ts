@@ -1,56 +1,44 @@
-const arrayRange = (start: number, stop: number, step: number) => {
+export const arrayRange = (start: number, stop: number, step: number) => {
   return Array.from(
     { length: (stop - start) / step + 1 },
     (value, index) => start + index * step
   );
 };
 
-export const convertKeypresses = (
+export const countEvents = (
+  timeArray: number[],
   data: any,
-  timeResolution: number,
-  window: number
+  averageWindow: number
 ) => {
+  if (data === undefined) return arrayRange(0, timeArray.length, 1);
   let timestamps: number[] = [];
   data.forEach((d: any) => {
     timestamps.push(new Date(d.timestamp).getTime());
   });
-  timestamps.reverse();
-  let t = arrayRange(
-    timestamps[0],
-    timestamps[timestamps.length - 2],
-    timeResolution
-  );
-  let totalKeypresses: number[] = [];
-  let keypresses = 0;
-  for (let i = 0; i < t.length; i++) {
-    keypresses += timestamps.filter((d: any) => {
-      return d > t[i] && d < t[i + 1];
-    }).length;
-    totalKeypresses.push(keypresses);
-  }
-  let limitedKeypresses = [];
-  for (let i = 0; i < t.length; i++) {
-    limitedKeypresses.push(
-      timestamps.filter((d: any) => {
-        if (window) {
-          return d > t[i + 1] - window && d < t[i + 1];
-        }
+  let countedEvents: number[] = [];
+  for (let i = 0; i < timeArray.length; i++) {
+    countedEvents.push(
+      timestamps.filter((timestamp: any, tsIdx: number) => {
+        const lowerBound = timeArray[i] - averageWindow;
+        const upperBound = timeArray[i];
+        return timestamp > lowerBound && timestamp < upperBound;
       }).length
     );
   }
-  return [t, limitedKeypresses];
+  return countedEvents;
 };
 
-export const activeTime = (
-  keypresses: any,
-  timeResolution: number,
-  activeLimit: number
+export const getActiveTime = (
+  timeArray: number[],
+  mouseData: any,
+  keyboardData: any,
+  timeResolution: number
 ) => {
   let activeTime = 0;
-  keypresses.map((d: any, i: number) => {
-    if (d > 0) {
+  timeArray.map((ts: any, i: number) => {
+    if (mouseData[i] > 0 || keyboardData[i] > 0) {
       activeTime += timeResolution;
     }
   });
-  return activeTime;
+  return Math.round((activeTime / (1000 * 60 * 60)) * 100) / 100;
 };

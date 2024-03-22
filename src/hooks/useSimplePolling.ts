@@ -3,15 +3,13 @@ import { useInterval } from "./useInterval";
 import useRepeatedTimeout from "./useRepeatedTimeout";
 
 const useSimplePolling = (
-  initialValue: any,
   processFn: (data: any) => any,
-  name: string,
   url: string,
   delay: number
 ) => {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [error, setError] = useState<any>();
-  const [fetchedData, setFetchedData] = useState<any>(initialValue);
+  const [fetchedData, setFetchedData] = useState<any>();
 
   const fetchFn = async () => {
     const response = await fetch(url);
@@ -30,7 +28,7 @@ const useSimplePolling = (
         const data = await fetchFn();
         setFetchedData(processFn(data));
       } catch (error: any) {
-        setError({ message: error.message || `Failed to fetch ${name}.` });
+        setError({ message: error.message || `Failed to fetch.` });
       }
       setIsFetching(false);
     }

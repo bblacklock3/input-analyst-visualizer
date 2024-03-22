@@ -17,6 +17,7 @@ import { MdSpeed } from "react-icons/md";
 import { BsMouse3Fill } from "react-icons/bs";
 import { FaKeyboard } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
+import { FaDatabase } from "react-icons/fa";
 import { useEffect, useLayoutEffect, useState } from "react";
 
 const NavBar = () => {
@@ -25,8 +26,8 @@ const NavBar = () => {
     const path = window.location.pathname;
     if (path === "/") {
       setActive("Dashboard");
-    } else if (path === "/mouse") {
-      setActive("Mouse");
+    } else if (path === "/database") {
+      setActive("Database");
     } else if (path === "/keyboard") {
       setActive("Keyboard");
     } else if (path === "/settings") {
@@ -50,8 +51,8 @@ const NavBar = () => {
         <NavLink to="/" onClick={() => setActive("Dashboard")}>
           <NavButton text="Dashboard" icon={MdSpeed} active={active} />
         </NavLink>
-        <NavLink to="/mouse" onClick={() => setActive("Mouse")}>
-          <NavButton text="Mouse" icon={BsMouse3Fill} active={active} />
+        <NavLink to="/database" onClick={() => setActive("Database")}>
+          <NavButton text="Database" icon={FaDatabase} active={active} />
         </NavLink>
         <NavLink to="/keyboard" onClick={() => setActive("Keyboard")}>
           <NavButton text="Keyboard" icon={FaKeyboard} active={active} />

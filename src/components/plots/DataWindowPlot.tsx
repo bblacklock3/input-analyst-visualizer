@@ -19,7 +19,8 @@ import {
   TimeScale,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { convertKeypresses } from "../../utils/keyboardMetrics";
+import { arrayRange, countEvents } from "../../utils/keyboardMetrics";
+import { toStrNoTimezone } from "../../utils/timeConversions";
 
 ChartJS.register(
   CategoryScale,
@@ -33,59 +34,74 @@ ChartJS.register(
   Legend
 );
 
-const arrayRange = (start: number, stop: number, step: number) => {
-  return Array.from(
-    { length: (stop - start) / step + 1 },
-    (value, index) => start + index * step
-  );
-};
-
 interface IProps {
-  startTime: string;
-  endTime: string;
-  timeWindow: number;
+  startTime: number;
+  endTime: number;
+  timeResolution: number;
+  averageWindow: number;
 }
 
-const DataWindowPlot = (props: IProps) => {
+const DataWindowPlot = ({
+  startTime,
+  endTime,
+  timeResolution,
+  averageWindow,
+}: IProps) => {
   const [plotData, setPlotData] = useState<any>({
-    x: [],
-    y: [],
+    timeArray: [],
+    keypresses: [],
+    clicks: [],
   });
 
-  const startDatetime = props.startTime;
-  const endDatetime = props.endTime;
-  const timeResolution = 60 * 1000; // 1 min
-  const smaWindow = 1;
-  const totalPixelWidth = 1200;
+  async function handleKeypressData() {
+    const startStr = `start_date=${toStrNoTimezone(startTime)}`;
+    const endStr = `end_date=${toStrNoTimezone(endTime)}`;
+    const timeArray = arrayRange(startTime, endTime, timeResolution);
 
-  function handleKeypressData() {
-    const startStr = `start_date=${startDatetime}`;
-    const endStr = `end_date=${endDatetime}`;
-
-    fetch(`${DB_URL}data/keyboard-data/?${startStr}&${endStr}`)
-      .then((res) => res.json())
+    const keypresses = await fetch(
+      `${DB_URL}data/keyboard-data/?${startStr}&${endStr}`
+    )
+      .then((res) => {
+        return res.ok ? res.json() : [];
+      })
       .then((data: any) => {
-        const [t, limitedKeypresses] = convertKeypresses(
-          data,
-          timeResolution,
-          props.timeWindow
-        );
-        setPlotData({
-          x: t,
-          y: limitedKeypresses,
-        });
+        return countEvents(timeArray, data, averageWindow);
       });
+    const clicks = await fetch(
+      `${DB_URL}data/mouse-data/?${startStr}&${endStr}`
+    )
+      .then((res) => {
+        return res.ok ? res.json() : [];
+      })
+      .then((data: any) => {
+        return countEvents(timeArray, data, averageWindow);
+      });
+    setPlotData(() => {
+      return {
+        timeArray,
+        keypresses,
+        clicks,
+      };
+    });
   }
   useEffect(() => {
     handleKeypressData();
-  }, [props.startTime, props.endTime, props.timeWindow]);
+  }, [startTime, endTime, averageWindow]);
 
   const data = {
-    labels: plotData.x,
+    labels: plotData.timeArray,
     datasets: [
       {
+        label: "Clicks",
+        data: plotData.clicks,
+        fill: true,
+        pointRadius: 0,
+        backgroundColor: "#3ab740a3",
+        borderColor: "#3bea47ff",
+      },
+      {
         label: "Keypresses",
-        data: plotData.y,
+        data: plotData.keypresses,
         fill: true,
         pointRadius: 0,
         backgroundColor: "#3a6cb7a3",
@@ -103,8 +119,8 @@ const DataWindowPlot = (props: IProps) => {
 
     scales: {
       x: {
-        min: props.startTime,
-        max: props.endTime,
+        min: startTime,
+        max: endTime,
         type: "time" as const,
         adapters: {
           date: {

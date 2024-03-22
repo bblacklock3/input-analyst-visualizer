@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Grid, VStack, HStack, Heading, Text } from "@chakra-ui/react";
-import PollingCircularProgress from "../components/PollingCircularProgress";
-import KeypressCard from "../components/cards/KeypressCard";
+import CircularProgressWidget from "../components/CircularProgressWidget";
+import KeypressCard from "../components/cards/DailySummary";
 import {
   addMinutes,
   addHours,
@@ -9,18 +9,24 @@ import {
   toStrNoTimezone,
   readableTime,
 } from "../utils/timeConversions";
+import useSimplePolling from "../hooks/useSimplePolling";
 
 const Dashboard = () => {
-  function startOfToday() {
-    return () => toStrNoTimezone(startOfDay(Date.now()));
-  }
+  const processFn = (data: any) => {
+    return data;
+  };
 
-  function nowPlusHours(hours: number) {
-    return () => toStrNoTimezone(addHours(Date.now(), hours));
-  }
+  let { fetchedData: recentData } = useSimplePolling(
+    processFn,
+    "http://localhost:8000/data/recent",
+    200
+  );
 
-  function nowPlusMinutes(minutes: number) {
-    return () => toStrNoTimezone(addMinutes(Date.now(), minutes));
+  if (!recentData) {
+    recentData = {
+      clicks: [0, 0, 0, 0, 0],
+      keypresses: [0, 0, 0, 0, 0],
+    };
   }
 
   return (
@@ -42,51 +48,41 @@ const Dashboard = () => {
                         "a a d e"`}
       >
         <Box gridArea={"a"}>
-          <PollingCircularProgress
-            type={"click"}
-            startTime={startOfToday()}
+          <CircularProgressWidget
             title={"Today"}
-            dataStr={"/mouse-data/clicks"}
+            value={recentData.clicks[4]}
             limit={5000}
             scale={1.2}
           />
         </Box>
         <Box gridArea={"b"}>
-          <PollingCircularProgress
-            type={"click"}
-            startTime={nowPlusHours(-1)}
+          <CircularProgressWidget
             title={"1 Hour"}
-            dataStr={"/mouse-data/clicks"}
+            value={recentData.clicks[3]}
             limit={1250}
             scale={0.6}
           />
         </Box>
         <Box gridArea={"c"}>
-          <PollingCircularProgress
-            type={"click"}
-            startTime={nowPlusHours(-0.25)}
+          <CircularProgressWidget
             title={"15 Min"}
-            dataStr={"/mouse-data/clicks"}
+            value={recentData.clicks[2]}
             limit={500}
             scale={0.6}
           />
         </Box>
         <Box mt={-4} gridArea={"d"}>
-          <PollingCircularProgress
-            type={"click"}
-            startTime={nowPlusMinutes(-5)}
+          <CircularProgressWidget
             title={"5 Min"}
-            dataStr={"/mouse-data/clicks"}
+            value={recentData.clicks[1]}
             limit={200}
             scale={0.6}
           />
         </Box>
         <Box mt={-4} gridArea={"e"}>
-          <PollingCircularProgress
-            type={"click"}
-            startTime={nowPlusMinutes(-1)}
+          <CircularProgressWidget
             title={"1 Min"}
-            dataStr={"/mouse-data/clicks"}
+            value={recentData.clicks[0]}
             limit={100}
             scale={0.6}
           />
@@ -109,51 +105,41 @@ const Dashboard = () => {
                         "a a d e"`}
       >
         <Box gridArea={"a"}>
-          <PollingCircularProgress
-            type={"keypress"}
-            startTime={startOfToday()}
+          <CircularProgressWidget
             title={"Today"}
-            dataStr={"/keyboard-data/keypresses"}
+            value={recentData.keypresses[4]}
             limit={10000}
             scale={1.2}
           />
         </Box>
         <Box gridArea={"b"}>
-          <PollingCircularProgress
-            type={"keypress"}
-            startTime={nowPlusHours(-1)}
+          <CircularProgressWidget
             title={"1 Hour"}
-            dataStr={"/keyboard-data/keypresses"}
+            value={recentData.keypresses[3]}
             limit={2500}
             scale={0.6}
           />
         </Box>
         <Box gridArea={"c"}>
-          <PollingCircularProgress
-            type={"keypress"}
-            startTime={nowPlusHours(-0.25)}
+          <CircularProgressWidget
             title={"15 Min"}
-            dataStr={"/keyboard-data/keypresses"}
+            value={recentData.keypresses[2]}
             limit={1000}
             scale={0.6}
           />
         </Box>
         <Box mt={-4} gridArea={"d"}>
-          <PollingCircularProgress
-            type={"keypress"}
-            startTime={nowPlusMinutes(-5)}
+          <CircularProgressWidget
             title={"5 Min"}
-            dataStr={"/keyboard-data/keypresses"}
+            value={recentData.keypresses[1]}
             limit={400}
             scale={0.6}
           />
         </Box>
         <Box mt={-4} gridArea={"e"}>
-          <PollingCircularProgress
-            type={"keypress"}
-            startTime={nowPlusMinutes(-1)}
+          <CircularProgressWidget
             title={"1 Min"}
-            dataStr={"/keyboard-data/keypresses"}
+            value={recentData.keypresses[0]}
             limit={200}
             scale={0.6}
           />

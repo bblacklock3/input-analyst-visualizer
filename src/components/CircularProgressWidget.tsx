@@ -5,37 +5,14 @@ import { DB_URL } from "../utils/constants";
 import { px, pxHalf } from "../utils/dynamicCSS";
 
 interface IProps {
-  type: string;
-  startTime: () => string;
   title: string;
-  dataStr: string;
+  value: number;
   limit: number;
   scale: number;
   icon?: any;
 }
 
-const PollingCircularProgress = (props: IProps) => {
-  function processInput(data: any) {
-    try {
-      if (props.type === "keypress") {
-        return data.total;
-      } else if (props.type === "click") {
-        return data.right_click + data.left_click;
-      }
-    } catch (err) {
-      console.log(err);
-      return 0;
-    }
-  }
-
-  const { fetchedData: clicks } = useSimplePolling(
-    0,
-    processInput,
-    "input",
-    DB_URL + "data" + props.dataStr + "/?start_date=" + props.startTime(),
-    1000
-  );
-
+const CircularProgressWidget = (props: IProps) => {
   return (
     <VStack>
       <Text
@@ -47,7 +24,7 @@ const PollingCircularProgress = (props: IProps) => {
         {props.title}
       </Text>
       <CustomCircularProgress
-        value={clicks}
+        value={props.value}
         maxValue={props.limit}
         scale={props.scale}
       />
@@ -55,4 +32,4 @@ const PollingCircularProgress = (props: IProps) => {
   );
 };
 
-export default PollingCircularProgress;
+export default CircularProgressWidget;

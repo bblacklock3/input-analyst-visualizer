@@ -7,6 +7,7 @@ import NavBar from "./components/NavBar";
 import MainBox from "./components/MainBox";
 import Settings from "./routes/Settings";
 import DataAnalyst from "./components/DataAnalyst";
+import DataSummaryTable from "./components/DataSummaryTable";
 
 function Layout() {
   return (
@@ -28,12 +29,12 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
-        path: "/mouse",
-        element: <DataAnalyst />,
+        path: "/database",
+        element: <DataSummaryTable />,
       },
       {
         path: "/keyboard",
-        element: <KeyboardAnalyst />,
+        element: <DataAnalyst />,
       },
       {
         path: "/settings",
